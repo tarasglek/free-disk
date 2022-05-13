@@ -69,7 +69,6 @@ def _main() -> None:
         format="%(asctime)s:%(levelname)s:%(message)s",
         datefmt="%Y-%m-%dT%H:%M:%S%z",
     )
-    logging.debug("Required free bytes: %d", args.free_bytes)
     disk_usage = shutil.disk_usage(args.root_dir_path)
     logging.debug(disk_usage)
     space_to_free = args.free_bytes - disk_usage.free
@@ -81,6 +80,7 @@ def _main() -> None:
         else:
             return shutil.disk_usage(args.root_dir_path).free >= args.free_bytes
 
+    logging.debug(f'Required free bytes: {args.free_bytes}. {space_to_free} bytes to free')
     if sufficient_free_space():
         logging.debug("Requirement already fulfilled")
         return
@@ -100,7 +100,7 @@ def _main() -> None:
             break
         os.remove(file_path)
         logging.debug(
-            "Freed %d bytes by removing file %s ", file_stat.st_size, file_path
+            f"Freed {file_stat.st_size}/{space_freed} bytes by removing file {file_path}"
         )
         space_freed += file_stat.st_size
         removed_files_counter += 1
