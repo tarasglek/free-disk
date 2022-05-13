@@ -112,10 +112,10 @@ def _main() -> None:
             break
         if not args.dry_run:
             os.remove(file_path)
+        space_freed += file_stat.st_size
         logging.debug(
             f"Freed {pretty(file_stat.st_size)}/{pretty(space_freed)} bytes by removing file {file_path}"
         )
-        space_freed += file_stat.st_size
         removed_files_counter += 1
         last_mtime = file_stat.st_mtime
     if removed_files_counter == 0:
