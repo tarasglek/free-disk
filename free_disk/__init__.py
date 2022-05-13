@@ -51,6 +51,11 @@ def _main() -> None:
         help="Use total size of deleted files instead of filesystem free space for completion. This is useful on filesystems like ZFS with laggy free-disk indicators",
     )
     argparser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Do not delete any files, Implies --track-bytes-deleted."
+    )
+    argparser.add_argument(
         "--delete-re",
         action="store",
         help="Only delete files matching regexp. examples: .*mp4$",
@@ -84,6 +89,8 @@ def _main() -> None:
     if sufficient_free_space():
         logging.debug("Requirement already fulfilled")
         return
+    if args.dry_run:
+        args.track_bytes_deleted = True
     file_paths = [
         os.path.join(dirpath, filename)
         for dirpath, _, filenames in os.walk(args.root_dir_path)
@@ -98,7 +105,8 @@ def _main() -> None:
     for file_stat, file_path in stat_paths:
         if sufficient_free_space(args.track_bytes_deleted):
             break
-        os.remove(file_path)
+        if not args.dry_run:
+            os.remove(file_path)
         logging.debug(
             f"Freed {file_stat.st_size}/{space_freed} bytes by removing file {file_path}"
         )
