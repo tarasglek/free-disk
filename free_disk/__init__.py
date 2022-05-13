@@ -25,6 +25,11 @@ _DATA_SIZE_UNIT_BYTE_CONVERSION_FACTOR = {
     "TiB": 2**40,
 }
 
+def pretty(number):
+    for unit,val in reversed(_DATA_SIZE_UNIT_BYTE_CONVERSION_FACTOR.items()):
+        if number > val:
+            return f'{round(number*1.00/val,2)}{unit}'
+    return str(number)
 
 def _data_size_to_bytes(size_with_unit: str) -> int:
     match = re.match(r"^([\d\.]+)\s*([A-Za-z]+)?$", size_with_unit)
@@ -85,7 +90,7 @@ def _main() -> None:
         else:
             return shutil.disk_usage(args.root_dir_path).free >= args.free_bytes
 
-    logging.debug(f'Required free bytes: {args.free_bytes}. {space_to_free} bytes to free')
+    logging.debug(f'Required free bytes: {pretty(args.free_bytes)}. {pretty(space_to_free)} bytes to free')
     if sufficient_free_space():
         logging.debug("Requirement already fulfilled")
         return
@@ -108,7 +113,7 @@ def _main() -> None:
         if not args.dry_run:
             os.remove(file_path)
         logging.debug(
-            f"Freed {file_stat.st_size}/{space_freed} bytes by removing file {file_path}"
+            f"Freed {pretty(file_stat.st_size)}/{pretty(space_freed)} bytes by removing file {file_path}"
         )
         space_freed += file_stat.st_size
         removed_files_counter += 1
@@ -118,11 +123,11 @@ def _main() -> None:
     else:
         assert last_mtime is not None  # for mypy
         logging.info(
-            "Removed %d file(s) with modification date <= %sZ. Deleted %d bytes. Filesystem freed %d bytes.",
+            "Removed %d file(s) with modification date <= %sZ. Deleted %s bytes. Filesystem freed %s bytes.",
             removed_files_counter,
             datetime.datetime.utcfromtimestamp(last_mtime).isoformat("T"),
-            space_freed,
-            shutil.disk_usage(args.root_dir_path).free - disk_usage.free,
+            pretty(space_freed),
+            pretty(shutil.disk_usage(args.root_dir_path).free - disk_usage.free),
         )
 
     # exit with 0 if sufficient_free_space returns True
