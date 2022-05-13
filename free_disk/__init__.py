@@ -90,7 +90,7 @@ def _main() -> None:
         else:
             return shutil.disk_usage(args.root_dir_path).free >= args.free_bytes
 
-    logging.debug(f'Required free bytes: {pretty(args.free_bytes)}. {pretty(space_to_free)} bytes to free')
+    logging.debug(f'Required free: {pretty(args.free_bytes)}. {pretty(space_to_free)} to free')
     if sufficient_free_space():
         logging.debug("Requirement already fulfilled")
         return
@@ -114,7 +114,7 @@ def _main() -> None:
             os.remove(file_path)
         space_freed += file_stat.st_size
         logging.debug(
-            f"Freed {pretty(file_stat.st_size)}/{pretty(space_freed)} bytes by removing file {file_path}"
+            f"Freed {pretty(file_stat.st_size)}/{pretty(space_freed)} by removing file {file_path}"
         )
         removed_files_counter += 1
         last_mtime = file_stat.st_mtime
@@ -123,7 +123,7 @@ def _main() -> None:
     else:
         assert last_mtime is not None  # for mypy
         logging.info(
-            "Removed %d file(s) with modification date <= %sZ. Deleted %s bytes. Filesystem freed %s bytes.",
+            "Removed %d file(s) with modification date <= %sZ. Deleted %s. Filesystem freed %s.",
             removed_files_counter,
             datetime.datetime.utcfromtimestamp(last_mtime).isoformat("T"),
             pretty(space_freed),
