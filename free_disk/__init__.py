@@ -29,7 +29,7 @@ def pretty(number):
     abs_number = abs(number)
     for unit,val in reversed(_DATA_SIZE_UNIT_BYTE_CONVERSION_FACTOR.items()):
         if abs_number > val:
-            return f'{round(number*1.00/val,2)}{unit}'
+            return f'{round(number/val,2)}{unit}'
     return str(number)
 
 def _data_size_to_bytes(size_with_unit: str) -> int:
