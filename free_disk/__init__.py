@@ -87,11 +87,15 @@ def _main() -> None:
 
     def sufficient_free_space(track_bytes_deleted=False):
         if track_bytes_deleted:
+            diff = space_to_free - space_freed
+            logging.debug(f'space_to_free(space_to_free)({pretty(space_to_free)}) - space_freed({space_freed})({pretty(space_freed)}) = {diff}({pretty(diff)})')
             return space_to_free - space_freed <= 0
         else:
-            return shutil.disk_usage(args.root_dir_path).free >= args.free_bytes
+            disk_free = shutil.disk_usage(args.root_dir_path).free
+            logging.debug(f'disk_free({pretty(disk_free)}) >= free_bytes({pretty(args.free_bytes)})')
+            return  disk_free >= args.free_bytes
 
-    logging.debug(f'Required free: {pretty(args.free_bytes)}. {pretty(space_to_free)} to free')
+    logging.debug(f'Required free: {pretty(args.free_bytes)}. {pretty(space_to_free)} to free. track-bytes-deleted{args.track_bytes_deleted}')
     if sufficient_free_space():
         logging.debug("Requirement already fulfilled")
         return
