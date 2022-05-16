@@ -25,12 +25,14 @@ _DATA_SIZE_UNIT_BYTE_CONVERSION_FACTOR = {
     "TiB": 2**40,
 }
 
+
 def pretty(number):
     abs_number = abs(number)
-    for unit,val in reversed(_DATA_SIZE_UNIT_BYTE_CONVERSION_FACTOR.items()):
+    for unit, val in reversed(_DATA_SIZE_UNIT_BYTE_CONVERSION_FACTOR.items()):
         if abs_number > val:
-            return f'{round(number/val,2)}{unit}'
+            return f"{round(number/val,2)}{unit}"
     return str(number)
+
 
 def _data_size_to_bytes(size_with_unit: str) -> int:
     match = re.match(r"^([\d\.]+)\s*([A-Za-z]+)?$", size_with_unit)
@@ -59,7 +61,7 @@ def _main() -> None:
     argparser.add_argument(
         "--dry-run",
         action="store_true",
-        help="Do not delete any files, Implies --track-bytes-deleted."
+        help="Do not delete any files, Implies --track-bytes-deleted.",
     )
     argparser.add_argument(
         "--delete-re",
@@ -88,14 +90,20 @@ def _main() -> None:
     def sufficient_free_space(track_bytes_deleted=False):
         if track_bytes_deleted:
             diff = space_to_free - space_freed
-            logging.debug(f'space_to_free(space_to_free)({pretty(space_to_free)}) - space_freed({space_freed})({pretty(space_freed)}) = {diff}({pretty(diff)})')
+            logging.debug(
+                f"space_to_free(space_to_free)({pretty(space_to_free)}) - space_freed({space_freed})({pretty(space_freed)}) = {diff}({pretty(diff)})"
+            )
             return space_to_free - space_freed <= 0
         else:
             disk_free = shutil.disk_usage(args.root_dir_path).free
-            logging.debug(f'disk_free({pretty(disk_free)}) >= free_bytes({pretty(args.free_bytes)})')
-            return  disk_free >= args.free_bytes
+            logging.debug(
+                f"disk_free({pretty(disk_free)}) >= free_bytes({pretty(args.free_bytes)})"
+            )
+            return disk_free >= args.free_bytes
 
-    logging.debug(f'Required free: {pretty(args.free_bytes)}. {pretty(space_to_free)} to free. track-bytes-deleted{args.track_bytes_deleted}')
+    logging.debug(
+        f"Required free: {pretty(args.free_bytes)}. {pretty(space_to_free)} to free. track-bytes-deleted{args.track_bytes_deleted}"
+    )
     if sufficient_free_space():
         logging.debug("Requirement already fulfilled")
         return
