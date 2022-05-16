@@ -122,9 +122,7 @@ def _main() -> None:
         if not args.dry_run:
             os.remove(file_path)
         space_freed += file_stat.st_size
-        logging.debug(
-            f"Deleted\t{file_path}\t{pretty(file_stat.st_size)}"
-        )
+        logging.debug(f"Deleted\t{file_path}\t{pretty(file_stat.st_size)}")
         removed_files_counter += 1
         last_mtime = file_stat.st_mtime
     if removed_files_counter == 0:
