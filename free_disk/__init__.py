@@ -86,29 +86,25 @@ def _main() -> None:
     logging.debug(disk_usage)
     space_to_free = args.free_bytes - disk_usage.free
     space_freed = 0
+    if args.dry_run:
+        args.track_bytes_deleted = True
 
     def sufficient_free_space(track_bytes_deleted=False):
         if track_bytes_deleted:
             diff = space_to_free - space_freed
-            logging.debug(
-                f"space_to_free(space_to_free)({pretty(space_to_free)}) - space_freed({space_freed})({pretty(space_freed)}) = {diff}({pretty(diff)})"
-            )
             return space_to_free - space_freed <= 0
         else:
             disk_free = shutil.disk_usage(args.root_dir_path).free
-            logging.debug(
-                f"disk_free({pretty(disk_free)}) >= free_bytes({pretty(args.free_bytes)})"
-            )
             return disk_free >= args.free_bytes
 
     logging.debug(
-        f"Required free: {pretty(args.free_bytes)}. {pretty(space_to_free)} to free. track-bytes-deleted{args.track_bytes_deleted}"
+        f"Required free: {pretty(args.free_bytes)}. {pretty(space_to_free)} to free. --track-bytes-deleted={args.track_bytes_deleted}"
     )
+
     if sufficient_free_space():
         logging.debug("Requirement already fulfilled")
         return
-    if args.dry_run:
-        args.track_bytes_deleted = True
+
     file_paths = [
         os.path.join(dirpath, filename)
         for dirpath, _, filenames in os.walk(args.root_dir_path)
@@ -127,7 +123,7 @@ def _main() -> None:
             os.remove(file_path)
         space_freed += file_stat.st_size
         logging.debug(
-            f"Freed {pretty(file_stat.st_size)}/{pretty(space_freed)} by removing file {file_path}"
+            f"Deleted\t{file_path}\t{pretty(file_stat.st_size)}"
         )
         removed_files_counter += 1
         last_mtime = file_stat.st_mtime
