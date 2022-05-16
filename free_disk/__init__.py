@@ -92,7 +92,7 @@ def _main() -> None:
     def sufficient_free_space(track_bytes_deleted=False):
         if track_bytes_deleted:
             diff = space_to_free - space_freed
-            return space_to_free - space_freed <= 0
+            return diff <= 0
         else:
             disk_free = shutil.disk_usage(args.root_dir_path).free
             return disk_free >= args.free_bytes
