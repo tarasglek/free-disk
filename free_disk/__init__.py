@@ -111,7 +111,17 @@ def _main() -> None:
         for filename in filenames
     ]
     delete_re = re.compile(args.delete_re)
-    stat_paths = [(os.stat(p), p) for p in file_paths if delete_re.match(p)]
+    stat_paths = []
+    for p in file_paths:
+        if delete_re.match(p):
+            # Handle race condition of files changing under us
+            # it's ok if file goes missing
+            try:
+                stat_info = os.stat(p)
+            except FileNotFoundError:
+                logging.error(f"File not found during stat: {p}")
+                continue
+            stat_paths.append((stat_info, p))
     stat_paths.sort(key=lambda x: x[0].st_mtime)
     removed_files_counter = 0
     last_mtime = None
@@ -120,7 +130,11 @@ def _main() -> None:
         if sufficient_free_space(args.track_bytes_deleted):
             break
         if not args.dry_run:
-            os.remove(file_path)
+            try:
+                os.remove(file_path)
+            except FileNotFoundError:
+                logging.error(f"File not found during remove: {file_path}")
+                continue
         space_freed += file_stat.st_size
         logging.debug(f"Deleted\t{file_path}\t{pretty(file_stat.st_size)}")
         removed_files_counter += 1
